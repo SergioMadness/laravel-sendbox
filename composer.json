@@ -1,0 +1,51 @@
+{
+  "name": "professionalweb/laravel-sendbox",
+  "description": "Library to work with Mail/VK Sendbox",
+  "homepage": "https://getlms.ru",
+  "keywords": [
+    "composer",
+    "sendbox",
+    "laravel",
+    "getlms"
+  ],
+  "minimum-stability": "stable",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Zinchenko Sergey",
+      "email": "zinchenko@getlms.online"
+    }
+  ],
+  "support": {
+    "email": "zinchenko@getlms.online",
+    "issues": "https://github.com/SergioMadness/laravel-sendbox/issues",
+    "wiki": "https://github.com/SergioMadness/laravel-sendbox/wiki",
+    "source": "https://github.com/SergioMadness/laravel-sendbox/releases"
+  },
+  "require": {
+    "php": ">=7.4",
+    "illuminate/support": "5.*"
+  },
+  "require-dev": {
+  },
+  "config": {
+    "process-timeout": 1800
+  },
+  "autoload": {
+    "psr-4": {
+      "professionalweb\\sendbox\\": "src/"
+    }
+  },
+  "suggest": {
+  },
+  "extra": {
+    "laravel": {
+      "dont-discover": [
+      ],
+      "providers": [
+        "professionalweb\\sendbox\\SendboxProvider"
+      ]
+    }
+  }
+}
