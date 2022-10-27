@@ -1,7 +1,7 @@
 <?php namespace professionalweb\sendbox\Services;
 
 use Illuminate\Support\Facades\Cache;
-use professionalweb\sendsay\models\Response;
+use professionalweb\sendbox\Models\Response;
 use professionalweb\sendbox\Interfaces\Services\Protocol;
 use professionalweb\sendbox\interfaces\Services\Response as IResponse;
 
@@ -20,8 +20,6 @@ class SendboxProtocol implements Protocol
 
     private ?string $accessToken = null;
 
-    private int $expiredTimestamp;
-
     public function __construct(string $clientId = '', string $clientSecret = '', string $url = 'https://mailer-api.i.bizml.ru/')
     {
         $this->setUrl($url)->setClientId($clientId)->setClientSecret($clientSecret);
@@ -33,7 +31,7 @@ class SendboxProtocol implements Protocol
      */
     protected function updateToken(): string
     {
-        $response = $this->call('/oauth/access_token', [
+        $response = $this->call(self::METHOD_TOKEN_UPDATE, [
             'grant_type'    => 'client_credentials',
             'client_id'     => $this->getClientId(),
             'client_secret' => $this->getClientSecret(),
@@ -57,19 +55,23 @@ class SendboxProtocol implements Protocol
      * @param array  $params
      * @param string $httpMethod
      *
-     * @return \professionalweb\sendbox\interfaces\Services\Response
+     * @return IResponse
+     * @throws \Exception
      */
-    public function call(string $method, array $params = [], string $httpMethod = 'post'): Response
+    public function call(string $method, array $params = [], string $httpMethod = 'post'): IResponse
     {
         $url = rtrim($this->getUrl(), '/') . '/' . ltrim($method, '/');
 
         $accessToken = $this->getAccessToken();
-        if (empty($accessToken)) {
+        if ($method !== self::METHOD_TOKEN_UPDATE && empty($accessToken)) {
             $this->setAccessToken($accessToken = $this->updateToken());
         }
 
-        $headers = ['Authorization: Bearer ' . $accessToken];
-        $response = $this->sendRequest($url, $headers, $params);
+        $headers = [];
+        if (!empty($accessToken)) {
+            $headers = ['Authorization: Bearer ' . $accessToken];
+        }
+        $response = $this->sendRequest($url, $params, $headers);
         if ($response->needRedirect()) {
             return $this->sendRequest(
                 rtrim($this->getUrl(), '/') . '/' . ltrim($response->getRedirectUrl(), '/'),
@@ -94,6 +96,11 @@ class SendboxProtocol implements Protocol
      */
     protected function sendRequest(string $url, array $params = [], array $headers = [], string $method = 'post'): IResponse
     {
+        foreach ($params as $key => $val) {
+            if (!is_array($val) && !is_array($val)) {
+                $url = str_replace('{' . $key . '}', $val, $url);
+            }
+        }
         if ($method === 'get') {
             $url .= strpos($url, '?') ? '&' : '?';
             $url .= http_build_query($params);
@@ -103,7 +110,7 @@ class SendboxProtocol implements Protocol
         curl_setopt($curl, CURLOPT_HTTPHEADER, array_merge($headers, ['Content-Type:application/json']));
         if ($method === 'post') {
             curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
         } elseif ($method !== 'get') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, strtoupper($method));
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));

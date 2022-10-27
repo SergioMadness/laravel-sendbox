@@ -11,7 +11,7 @@ use professionalweb\sendbox\Interfaces\Services\AddressBook as IAddressBook;
 
 class SendboxProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         parent::register();
 

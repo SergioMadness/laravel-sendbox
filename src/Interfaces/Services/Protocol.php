@@ -2,6 +2,8 @@
 
 interface Protocol
 {
+    public const METHOD_TOKEN_UPDATE = '/oauth/access_token';
+
     /**
      * Call API method
      *
