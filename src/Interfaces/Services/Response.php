@@ -1,8 +1,8 @@
-<?php namespace professionalweb\sendbox\interfaces\Services;
+<?php namespace professionalweb\sendbox\Interfaces\Services;
 
 /**
  * Interface for Sendsay API response
- * @package professionalweb\sendbox\interfaces\Services
+ * @package professionalweb\sendbox\Interfaces\Services
  */
 interface Response
 {
